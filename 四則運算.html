@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>四則運算練習（離線可用）</title>
+  <style>
+    :root{
+      --bg:#070b16;
+      --panel:#0c142b;
+      --panel2:#0b1226;
+      --text:#e7eaf2;
+      --muted:#aab2c5;
+      --line:rgba(255,255,255,.09);
+      --accent:#2b7cff;
+      --good:#00d18f;
+      --bad:#ff5c7a;
+      --warn:#ffcc66;
+      --radius:18px;
+      --shadow:0 20px 60px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Microsoft JhengHei", "PingFang TC", sans-serif;
+      background:
+        radial-gradient(1200px 600px at 30% 20%, rgba(43,124,255,.16), transparent 60%),
+        radial-gradient(1000px 600px at 70% 65%, rgba(0,209,143,.12), transparent 65%),
+        var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+      padding:22px;
+    }
+    h1{
+      font-size:22px;
+      margin:4px 0 18px;
+      letter-spacing:.4px;
+      color:#dfe6ff;
+      font-weight:800;
+      text-align:center;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap:16px;
+      align-items:stretch;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background: rgba(255,255,255,.02);
+      border-bottom:1px solid var(--line);
+    }
+    .card .hd .title{
+      font-weight:800;
+      letter-spacing:.3px;
+      font-size:14px;
+      color:#d9e1ff;
+      opacity:.95;
+    }
+    .card .bd{
+      padding:14px 16px 16px;
+    }
+    .btn{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.15s;
+      user-select:none;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.16);}
+    .btn:active{transform: translateY(0px);}
+    .btn.primary{
+      background: var(--accent);
+      border-color: rgba(43,124,255,.55);
+      color:white;
+    }
+    .btn.danger{
+      background: rgba(255,92,122,.14);
+      border-color: rgba(255,92,122,.35);
+    }
+    .btn:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none;
+    }
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .col{display:flex; flex-direction:column; gap:8px;}
+    .field{
+      background: rgba(255,255,255,.02);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .field label{font-size:12px; color:var(--muted); font-weight:700;}
+    .field input[type="number"]{
+      width:110px;
+      background: transparent;
+      border:0;
+      outline:none;
+      color:var(--text);
+      font-size:16px;
+      font-weight:800;
+      text-align:right;
+    }
+    .field input[type="checkbox"]{transform: scale(1.1);}
+    .ops{
+      display:flex; gap:10px; flex-wrap:wrap;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background: rgba(255,255,255,.02);
+    }
+    .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:8px 10px;
+      font-weight:800;
+      background: rgba(255,255,255,.02);
+      user-select:none;
+    }
+    .pill input{transform: scale(1.1);}
+    .muted{color:var(--muted); font-size:12px; line-height:1.5;}
+    .bigStatus{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding:18px 18px 8px;
+    }
+    .state{
+      font-size:28px;
+      font-weight:900;
+      letter-spacing:.4px;
+    }
+    .substate{
+      margin-top:6px;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      font-weight:800;
+      color:#dfe6ff;
+      white-space:nowrap;
+    }
+    .badge.good{border-color: rgba(0,209,143,.35); background: rgba(0,209,143,.10);}
+    .badge.warn{border-color: rgba(255,204,102,.35); background: rgba(255,204,102,.10);}
+    .qa{
+      padding:0 18px 10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .qa .label{font-weight:800; color:#dfe6ff;}
+    .qa input{
+      width:160px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      color:var(--text);
+      font-size:18px;
+      font-weight:900;
+      outline:none;
+    }
+    .summary{
+      padding:0 18px 14px;
+      color:var(--muted);
+      font-weight:700;
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.015);
+    }
+    thead th{
+      text-align:left;
+      font-size:12px;
+      color:#d9e1ff;
+      background: rgba(255,255,255,.03);
+      border-bottom:1px solid var(--line);
+      padding:10px 10px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    tbody td{
+      padding:10px 10px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      font-size:13px;
+      color: #e9edff;
+      vertical-align:top;
+      word-break:break-word;
+    }
+    tbody tr:last-child td{border-bottom:0;}
+    .res.ok{color:var(--good); font-weight:900;}
+    .res.ng{color:var(--bad); font-weight:900;}
+    .res.to{color:var(--warn); font-weight:900;}
+    .rightCard .bd{padding:0;}
+    .tableWrap{padding:0 18px 18px;}
+    .topRightBtns{
+      display:flex; gap:10px; flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>四則運算練習（網頁版 / 離線可用）</h1>
+
+    <div class="grid">
+      <!-- LEFT: Settings -->
+      <div class="card">
+        <div class="hd">
+          <div class="title">設定</div>
+          <button class="btn" id="btnClear" title="清空紀錄">清空紀錄</button>
+        </div>
+        <div class="bd col" style="gap:10px;">
+          <div class="row">
+            <div class="field" style="flex:1;">
+              <label>題數</label>
+              <input id="inpCount" type="number" min="1" max="200" value="10">
+            </div>
+            <div class="field" style="flex:1;">
+              <label>每題限時(秒)</label>
+              <input id="inpLimit" type="number" min="1" max="120" value="5">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field" style="flex:1;">
+              <label>不限制</label>
+              <input id="chkNoLimit" type="checkbox">
+            </div>
+            <div class="field" style="flex:1;">
+              <label>結算自動下載 CSV</label>
+              <input id="chkAutoCsv" type="checkbox" checked>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field" style="flex:1;">
+              <label>被運算數位數 A</label>
+              <input id="inpDigitsA" type="number" min="1" max="6" value="1">
+            </div>
+            <div class="field" style="flex:1;">
+              <label>運算數位數 B</label>
+              <input id="inpDigitsB" type="number" min="1" max="6" value="1">
+            </div>
+          </div>
+
+          <div class="ops" aria-label="運算種類">
+            <span class="pill"><input type="checkbox" id="opAdd" checked><label for="opAdd">+</label></span>
+            <span class="pill"><input type="checkbox" id="opSub" checked><label for="opSub">-</label></span>
+            <span class="pill"><input type="checkbox" id="opMul" checked><label for="opMul">×</label></span>
+            <span class="pill"><input type="checkbox" id="opDiv" checked><label for="opDiv">÷</label></span>
+          </div>
+
+          <div class="row">
+            <button class="btn primary" id="btnStart" style="flex:1;">開始</button>
+            <button class="btn" id="btnStop" style="flex:1;" disabled>停止 / 結算</button>
+          </div>
+
+          <div class="row">
+            <button class="btn" id="btnDownload" style="flex:1;">下載 CSV</button>
+          </div>
+
+          <div class="muted">
+            小提示：除法題會保證整除（答案為整數）。<br>
+            超時會自動記錄並跳下一題。紀錄會存在本機（localStorage）。
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Game + Table -->
+      <div class="card rightCard">
+        <div class="bigStatus">
+          <div>
+            <div class="state" id="lblState">尚未開始</div>
+            <div class="substate" id="lblQuestion">按「開始」後出題</div>
+          </div>
+          <div class="topRightBtns">
+            <div class="badge" id="badgeTimer">倒數：-</div>
+            <div class="badge good" id="badgeAutoCsv" style="display:none;">已自動下載 CSV ✓</div>
+          </div>
+        </div>
+
+        <div class="qa">
+          <div class="label">答案：</div>
+          <input id="inpAns" type="text" inputmode="numeric" autocomplete="off" placeholder="輸入整數">
+          <button class="btn primary" id="btnSubmit" disabled>提交</button>
+        </div>
+
+        <div class="summary" id="lblSummary"></div>
+
+        <div class="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:54px;">#</th>
+                <th style="width:120px;">題目</th>
+                <th style="width:110px;">你的答案</th>
+                <th style="width:110px;">正確答案</th>
+                <th style="width:90px;">結果</th>
+                <th style="width:100px;">反應(秒)</th>
+                <th style="width:190px;">時間</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ---------- Utils ----------
+  const $ = (id) => document.getElementById(id);
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const ts = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+  };
+  const clampInt = (v, lo, hi, fallback) => {
+    const n = parseInt(v, 10);
+    if (Number.isNaN(n)) return fallback;
+    return Math.min(hi, Math.max(lo, n));
+  };
+  const randByDigits = (digits) => {
+    digits = clampInt(digits, 1, 6, 1);
+    if (digits === 1) return Math.floor(Math.random() * 10);     // 0..9
+    const lo = Math.pow(10, digits - 1);
+    const hi = Math.pow(10, digits) - 1;
+    return lo + Math.floor(Math.random() * (hi - lo + 1));
+  };
+  const downloadText = (filename, content, mime="text/plain;charset=utf-8") => {
+    const blob = new Blob([content], {type:mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+  const escapeCsv = (s) => {
+    const t = String(s ?? "");
+    if (/[",\n]/.test(t)) return `"${t.replaceAll('"','""')}"`;
+    return t;
+  };
+
+  // ---------- Elements ----------
+  const inpCount   = $("inpCount");
+  const inpLimit   = $("inpLimit");
+  const chkNoLimit = $("chkNoLimit");
+  const inpDigitsA = $("inpDigitsA");
+  const inpDigitsB = $("inpDigitsB");
+  const chkAutoCsv = $("chkAutoCsv");
+
+  const opAdd = $("opAdd"), opSub = $("opSub"), opMul = $("opMul"), opDiv = $("opDiv");
+
+  const btnStart = $("btnStart");
+  const btnStop  = $("btnStop");
+  const btnSubmit= $("btnSubmit");
+  const btnClear = $("btnClear");
+  const btnDownload = $("btnDownload");
+
+  const lblState    = $("lblState");
+  const lblQuestion = $("lblQuestion");
+  const badgeTimer  = $("badgeTimer");
+  const badgeAutoCsv= $("badgeAutoCsv");
+
+  const inpAns = $("inpAns");
+  const tbody  = $("tbody");
+  const lblSummary = $("lblSummary");
+
+  // ---------- Storage ----------
+  const LS_KEY = "four_ops_records_v1";
+  const loadRecords = () => {
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); }
+    catch { return []; }
+  };
+  const saveRecords = () => localStorage.setItem(LS_KEY, JSON.stringify(state.records));
+
+  // ---------- State ----------
+  const state = {
+    running:false,
+    finished:false,
+    timer:null,
+
+    total:10,
+    limitSec:5,
+    noLimit:false,
+    digitsA:1,
+    digitsB:1,
+    ops:["+","-","×","÷"],
+    autoCsv:true,
+
+    index:0,
+    currentExpr:"",
+    currentAns:null,
+    qStartMs:0,
+    remain:0,
+
+    records: loadRecords()
+  };
+
+  // ---------- Render initial table ----------
+  const renderTable = () => {
+    tbody.innerHTML = "";
+    for (const r of state.records) addRow(r, false);
+    updateSummary();
+  };
+
+  const addRow = (r, persist=true) => {
+    const tr = document.createElement("tr");
+    const cls = r.result === "正確" ? "ok" : (r.result === "錯誤" ? "ng" : "to");
+    tr.innerHTML = `
+      <td>${r.no}</td>
+      <td>${r.question}</td>
+      <td>${r.your_answer}</td>
+      <td>${r.correct_answer}</td>
+      <td class="res ${cls}">${r.result}</td>
+      <td>${r.reaction_time_sec ?? ""}</td>
+      <td>${r.timestamp}</td>
+    `;
+    tbody.appendChild(tr);
+    if (persist) saveRecords();
+  };
+
+  const updateSummary = () => {
+    const total = state.records.length;
+    const correct = state.records.filter(r => r.result === "正確").length;
+    const wrong = state.records.filter(r => r.result === "錯誤").length;
+    const timeout = state.records.filter(r => r.result === "超時").length;
+
+    const rts = state.records
+      .map(r => parseFloat(r.reaction_time_sec))
+      .filter(x => Number.isFinite(x));
+    const avg = rts.length ? (rts.reduce((a,b)=>a+b,0) / rts.length) : 0;
+    const acc = total ? (correct / total * 100) : 0;
+
+    lblSummary.textContent = `答對：${correct}｜答錯：${wrong}｜超時：${timeout}｜正確率：${acc.toFixed(1)}%｜平均反應：${avg.toFixed(2)}s`;
+  };
+
+  // ---------- Question generation ----------
+  const getOps = () => {
+    const ops = [];
+    if (opAdd.checked) ops.push("+");
+    if (opSub.checked) ops.push("-");
+    if (opMul.checked) ops.push("×");
+    if (opDiv.checked) ops.push("÷");
+    return ops;
+  };
+
+  const genQuestion = () => {
+    const ops = state.ops;
+    const op = ops[Math.floor(Math.random() * ops.length)];
+
+    let a = randByDigits(state.digitsA);
+    let b = randByDigits(state.digitsB);
+
+    if (op === "+") return { expr: `${a} + ${b}`, ans: a + b };
+
+    if (op === "-") {
+      // 盡量避免負數
+      if (a < b) [a,b] = [b,a];
+      return { expr: `${a} - ${b}`, ans: a - b };
+    }
+
+    if (op === "×") return { expr: `${a} × ${b}`, ans: a * b };
+
+    // ÷：保證整除、b != 0
+    if (b === 0) b = 1;
+    // 讓 a 變成 b 的倍數：a = b*q
+    let qDigits = Math.max(1, state.digitsA - 1);
+    let q = randByDigits(qDigits);
+    if (q === 0) q = 1;
+    a = b * q;
+    return { expr: `${a} ÷ ${b}`, ans: Math.floor(a / b) };
+  };
+
+  // ---------- Game flow ----------
+  const readSettings = () => {
+    state.total = clampInt(inpCount.value, 1, 200, 10);
+    state.limitSec = clampInt(inpLimit.value, 1, 120, 5);
+    state.noLimit = !!chkNoLimit.checked;
+    state.digitsA = clampInt(inpDigitsA.value, 1, 6, 1);
+    state.digitsB = clampInt(inpDigitsB.value, 1, 6, 1);
+    state.autoCsv = !!chkAutoCsv.checked;
+
+    const ops = getOps();
+    if (!ops.length) return false;
+    state.ops = ops;
+
+    return true;
+  };
+
+  const setUiRunning = (on) => {
+    btnStart.disabled = on;
+    btnStop.disabled = !on;
+    btnSubmit.disabled = !on;
+    inpAns.disabled = !on;
+
+    inpCount.disabled = on;
+    inpLimit.disabled = on;
+    chkNoLimit.disabled = on;
+    inpDigitsA.disabled = on;
+    inpDigitsB.disabled = on;
+    chkAutoCsv.disabled = on;
+    opAdd.disabled = on;
+    opSub.disabled = on;
+    opMul.disabled = on;
+    opDiv.disabled = on;
+
+    badgeAutoCsv.style.display = "none";
+  };
+
+  const start = () => {
+    if (state.running) return;
+    if (!readSettings()){
+      alert("請至少勾選一種運算（+ - × ÷）");
+      return;
+    }
+
+    state.running = true;
+    state.finished = false;
+    state.index = 0;
+
+    setUiRunning(true);
+    nextQuestion();
+    inpAns.focus();
+  };
+
+  const finish = (auto=false) => {
+    stopTimer();
+    state.running = false;
+    state.finished = true;
+
+    setUiRunning(false);
+    lblState.textContent = "已結束";
+    lblQuestion.textContent = "遊戲結束";
+    badgeTimer.textContent = "倒數：-";
+    updateSummary();
+
+    if (auto && state.autoCsv && state.records.length){
+      downloadCsv(true);
+    } else if (!auto && state.autoCsv && state.records.length){
+      // 手動點「停止/結算」也算結算 → 自動下載
+      downloadCsv(true);
+    }
+  };
+
+  const stopTimer = () => {
+    if (state.timer){
+      clearInterval(state.timer);
+      state.timer = null;
+    }
+  };
+
+  const tick = () => {
+    if (!state.running) return;
+    badgeTimer.textContent = `倒數：${pad2(state.remain)}s`;
+
+    if (state.remain <= 0){
+      // timeout
+      recordTimeout();
+      return;
+    }
+    state.remain -= 1;
+  };
+
+  const nextQuestion = () => {
+    stopTimer();
+
+    if (state.index >= state.total){
+      finish(true);
+      return;
+    }
+
+    state.index += 1;
+    inpAns.value = "";
+
+    const q = genQuestion();
+    state.currentExpr = q.expr;
+    state.currentAns = q.ans;
+    state.qStartMs = performance.now();
+
+    lblState.textContent = "遊戲進行中";
+    lblQuestion.textContent = `第 ${state.index} / ${state.total} 題：  ${state.currentExpr} = ?`;
+
+    if (state.noLimit){
+      badgeTimer.textContent = "倒數：-";
+    } else {
+      state.remain = state.limitSec;
+      badgeTimer.textContent = `倒數：${pad2(state.remain)}s`;
+      state.remain -= 1;
+      state.timer = setInterval(tick, 1000);
+    }
+
+    updateSummary();
+  };
+
+  const submit = () => {
+    if (!state.running) return;
+
+    // if timed out already, ignore
+    if (!state.noLimit && state.remain < 0) return;
+
+    const user = inpAns.value.trim();
+    const rt = (performance.now() - state.qStartMs) / 1000;
+
+    const userInt = Number.parseInt(user, 10);
+    const ok = Number.isFinite(userInt) && userInt === state.currentAns;
+
+    const rec = {
+      no: state.index,
+      question: state.currentExpr,
+      your_answer: user ? user : "(空白)",
+      correct_answer: String(state.currentAns),
+      result: ok ? "正確" : "錯誤",
+      reaction_time_sec: rt.toFixed(2),
+      timestamp: ts()
+    };
+    state.records.push(rec);
+    addRow(rec, true);
+
+    nextQuestion();
+    inpAns.focus();
+  };
+
+  const recordTimeout = () => {
+    stopTimer();
+    // mark remain negative to avoid manual submit edge cases
+    state.remain = -1;
+
+    const rec = {
+      no: state.index,
+      question: state.currentExpr,
+      your_answer: "(超時)",
+      correct_answer: String(state.currentAns),
+      result: "超時",
+      reaction_time_sec: "",
+      timestamp: ts()
+    };
+    state.records.push(rec);
+    addRow(rec, true);
+
+    nextQuestion();
+  };
+
+  // ---------- CSV ----------
+  const buildCsv = () => {
+    const header = ["no","question","your_answer","correct_answer","result","reaction_time_sec","timestamp"];
+    const lines = [header.join(",")];
+    for (const r of state.records){
+      const row = header.map(k => escapeCsv(r[k]));
+      lines.push(row.join(","));
+    }
+    return lines.join("\n");
+  };
+
+  const downloadCsv = (fromAuto=false) => {
+    if (!state.records.length){
+      alert("目前沒有紀錄可匯出。");
+      return;
+    }
+    const name = `四則運算紀錄_${new Date().toISOString().replaceAll(":","").slice(0,15).replace("T","_")}.csv`;
+    const csv = buildCsv();
+    downloadText(name, csv, "text/csv;charset=utf-8");
+    if (fromAuto){
+      badgeAutoCsv.style.display = "inline-flex";
+      setTimeout(()=> badgeAutoCsv.style.display = "none", 3500);
+    }
+  };
+
+  // ---------- Clear ----------
+  const clear = () => {
+    if (state.running){
+      alert("請先停止 / 結算，再清空紀錄。");
+      return;
+    }
+    if (!confirm("確定要清空所有紀錄嗎？")) return;
+    state.records = [];
+    localStorage.removeItem(LS_KEY);
+    renderTable();
+    lblState.textContent = "尚未開始";
+    lblQuestion.textContent = "按「開始」後出題";
+    badgeTimer.textContent = "倒數：-";
+  };
+
+  // ---------- Events ----------
+  btnStart.addEventListener("click", start);
+  btnStop.addEventListener("click", () => finish(false));
+  btnSubmit.addEventListener("click", submit);
+  btnClear.addEventListener("click", clear);
+  btnDownload.addEventListener("click", () => downloadCsv(false));
+  inpAns.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") submit();
+  });
+
+  chkNoLimit.addEventListener("change", () => {
+    // 只是 UI 友善：勾不限制時，把限時欄灰掉
+    inpLimit.disabled = chkNoLimit.checked || state.running;
+  });
+
+  // init
+  inpLimit.disabled = chkNoLimit.checked;
+  renderTable();
+})();
+</script>
+</body>
+</html>
