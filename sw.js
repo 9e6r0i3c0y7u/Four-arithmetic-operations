@@ -1,8 +1,8 @@
 const CACHE_NAME = "four-arithmetic-v1";
 const urlsToCache = [
-  "./",
-  "./index.html",
-  "./manifest.json"
+  "/Four-arithmetic-operations/",
+  "/Four-arithmetic-operations/index.html",
+  "/Four-arithmetic-operations/manifest.json"
 ];
 
 self.addEventListener("install", e => {
