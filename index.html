@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-title" content="運算練習">
 <link rel="apple-touch-icon" href="icon-192.png">
   <meta charset="utf-8" />
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/Four-arithmetic-operations/manifest.json">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>四則運算練習（離線可用）</title>
   <style>
@@ -756,11 +756,12 @@
 </script>
 <script>
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
+  navigator.serviceWorker.register("/Four-arithmetic-operations/sw.js");
 }
 </script>
 </body>
 </html>
+
 
 
 
