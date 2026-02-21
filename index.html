@@ -756,11 +756,14 @@
 </script>
 <script>
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/Four-arithmetic-operations/sw.js");
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/Four-arithmetic-operations/sw.js");
+  });
 }
 </script>
 </body>
 </html>
+
 
 
 
